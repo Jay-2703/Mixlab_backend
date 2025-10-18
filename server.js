@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRouter from './routes/authRoutes.js';
 import { authenticateToken } from './middleware/authMiddleware.js';
+import lessonRoutes from './routes/lessonRoutes.js';
+
 
 
 dotenv.config();
@@ -14,7 +16,11 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.get('/', (req, res) => {
+  res.send(" API is running");
+});
 app.use('/auth', authRouter);
+app.use('/lessons', lessonRoutes);
 
 // Serve frontend files from "public" folder
 app.use(express.static("public"));
