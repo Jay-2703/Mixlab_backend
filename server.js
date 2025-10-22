@@ -3,7 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRouter from './routes/authRoutes.js';
 import { authenticateToken } from './middleware/authMiddleware.js';
+
+
 import lessonRoutes from './routes/lessonRoutes.js';
+import userRoutes from "./routes/userRoutes.js"
+import badgeRoutes from "./routes/badgeRoutes.js";
+import bookingRoutes from './routes/bookingRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 
 
@@ -29,6 +36,17 @@ app.use(express.static("public"));
 app.get('/profile', authenticateToken, (req, res) => {
   res.json({ message: 'This is protected', user: req.user });
 });
+
+// after app initialization
+app.use("/auth", userRoutes);
+
+
+app.use("/auth/lessons", lessonRoutes);
+app.use("/auth/badges", badgeRoutes);
+app.use('/auth', bookingRoutes);   
+app.use('/auth', notificationRoutes);
+app.use('/analytics', analyticsRoutes);
+
 
 
 app.listen(process.env.PORT, () => {

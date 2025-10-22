@@ -13,13 +13,13 @@ const connectToDatabase = async() => {
             database: process.env.DB_NAME,
             waitForConnections: true,
             connectionLimit: 10,
-        })
+            
+        });
     console.log('Connected to the database!');
 
     }
     return connection 
     
 };
-
 
 export { connectToDatabase };
