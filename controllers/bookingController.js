@@ -5,38 +5,52 @@ import Notification from '../models/notification.js';
 
 export const createBooking = async (req, res) => {
   try {
-    const { studentId, instructorId, lessonId, date, time } = req.body;
+    const { user_id, lesson_id, booking_date } = req.body;
 
-    // check for conflicts
-    const conflict = await Booking.checkConflict({ instructorId, date, time });
-    if (conflict) return res.status(400).json({ message: 'Time slot already booked' });
+    // (optional) check conflict if same lesson/time already booked
+    const conflict = await Booking.checkConflict({ lesson_id, booking_date });
+    if (conflict)
+      return res.status(400).json({ message: 'Time slot already booked' });
 
-    // generate QR code data (optional: include booking info)
-    const qrData = `booking:${studentId}-${lessonId}-${date}-${time}`;
+    // generate QR code
+    const qrData = `booking:${user_id}-${lesson_id}-${booking_date}`;
     const qrCode = await QRCode.toDataURL(qrData);
 
-    const booking = await Booking.create({ studentId, instructorId, lessonId, date, time, qrCode });
-
-    // Trigger notifications AFTER booking is created
-    await Notification.create({
-      userId: studentId,          // student gets notification
-      type: 'booking',
-      message: `Your booking for lesson ${lessonId} on ${date} at ${time} has been created`
+    // create booking
+    const booking = await Booking.create({
+      user_id,
+      lesson_id,
+      booking_date,
+      qr_code: qrCode
     });
 
+    // notify student
     await Notification.create({
-      userId: instructorId,       // instructor gets notification
+      userId: user_id,
       type: 'booking',
-      message: `New booking for lesson ${lessonId} with student ${studentId} on ${date} at ${time}`
+      message: `Your booking for lesson ${lesson_id} on ${booking_date} has been created.`
     });
+
+    // notify instructor (fetched from lesson)
+    const lesson = await Booking.getLessonInstructor(lesson_id);
+    if (lesson?.instructor_id) {
+      await Notification.create({
+        userId: lesson.instructor_id,
+        type: 'booking',
+        message: `A student booked your lesson (${lesson_id}) on ${booking_date}.`
+      });
+    }
 
     res.json({ message: 'Booking created', booking });
   } catch (error) {
-  console.error('Booking creation error:', error);
-  res.status(500).json({ message: 'Error creating booking', error: error.message });
-}
-
+    console.error('Booking creation error:', error);
+    res.status(500).json({
+      message: 'Error creating booking',
+      error: error.message
+    });
+  }
 };
+
 
 export const rescheduleBooking = async (req, res) => {
   try {

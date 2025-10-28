@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
 import { connectToDatabase  } from '../config/db.js';
 
-const saltRounds = 10;
+const saltRounds = 10; //rainbow table, same password
 
 const User = {
-  create: async ({ name, email, password, role = 'user' }) => {
+  create: async ({ name, email, password, role = 'user' }) => { ///db is student
     const hashed = await bcrypt.hash(password, saltRounds);
     const [result] = await db.query(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',

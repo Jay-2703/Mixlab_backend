@@ -1,6 +1,6 @@
 import { connectToDatabase } from "../config/db.js";
 
-// GET /profile
+// GET /profile //Already logged in 
 export const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;

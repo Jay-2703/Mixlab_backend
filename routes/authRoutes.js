@@ -1,21 +1,29 @@
 import express from 'express';
 import { login, register } from '../controllers/authController.js';
 import { forgotPassword, verifyOtp, resetPassword  } from '../controllers/authController.js';
-import {continueAsGuest} from '../controllers/guestController.js';
 
+
+
+
+//Guest
+import guestTracking from '../middleware/guestTracking.js';
+//import { registerUser, loginUser } from '../controllers/authController.js';
 
 const router = express.Router();
 
-// Auth routes
+// Auth routes and password reset - DONE TESTING
 router.post('/register', register);
 router.post('/login', login);
-
-
-
-//password reset
 router.post('/forgot-password', forgotPassword);   // send OTP
 router.post('/verify-otp', verifyOtp);            // check OTP
 router.post('/reset-password', resetPassword);    // set new password
-router.post('/guest', continueAsGuest);    // set new password
+
+
+
+//GUEST 
+//router.post('/register', guestTracking, registerUser);
+//router.post('/login', guestTracking, loginUser);
+
+
 
 export default router;

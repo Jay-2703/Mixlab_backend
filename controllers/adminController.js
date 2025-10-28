@@ -17,7 +17,7 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email, role } = req.body;
 
-    await connectToDatabase.query('UPDATE users SET name=?, email=?, role=? WHERE id=?', [
+    await connectToDatabase.query('UPDATE users SET username=?, email=?, role=? WHERE id=?', [
       name, email, role, id
     ]);
 

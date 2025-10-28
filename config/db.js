@@ -1,6 +1,6 @@
-import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
-
+import mysql from 'mysql2/promise'; //database
+import dotenv from 'dotenv'; //env
+ 
 dotenv.config();
 
 let connection;
@@ -13,13 +13,9 @@ const connectToDatabase = async() => {
             database: process.env.DB_NAME,
             waitForConnections: true,
             connectionLimit: 10,
-            
         });
     console.log('Connected to the database!');
-
     }
     return connection 
-    
 };
-
 export { connectToDatabase };

@@ -1,9 +1,7 @@
 import Notification from '../models/notification.js';
 
-/**
- * Send a custom notification (optional endpoint)
- * POST /notifications
- */
+ // Send a custom notification (optional endpoint)
+ // POST /notifications
 export const sendNotification = async (req, res) => {
   try {
     const { userId, type, message } = req.body;
@@ -19,10 +17,10 @@ export const sendNotification = async (req, res) => {
   }
 };
 
-/**
- * Get all notifications for a user
- * GET /notifications/:userId
- */
+
+ // Get all notifications for a user
+ // GET /notifications/:userId
+ 
 export const getNotifications = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -36,10 +34,9 @@ export const getNotifications = async (req, res) => {
   }
 };
 
-/**
- * Mark a notification as read
- * PUT /notifications/:id/read
- */
+
+// Mark a notification as read
+// PUT /notifications/:id/read
 export const markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
@@ -51,10 +48,8 @@ export const markAsRead = async (req, res) => {
   }
 };
 
-/**
- * Helper function for booking notifications
- * Use inside bookingController
- */
+// Helper function for booking notifications
+// Use inside bookingController
 export const notifyBookingAction = async (booking, action) => {
   // Extract data from booking
   const { student_id: studentId, instructor_id: instructorId, lesson_id: lessonId, date, time } = booking;

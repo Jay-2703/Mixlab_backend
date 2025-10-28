@@ -1,7 +1,6 @@
 // controllers/badgeController.js
 //import { Badge } from "../models/badgeModel.js"; -> error
 
-
 export const getAllBadges = async (req, res) => {
   try {
     const badges = await Badge.getAll();
