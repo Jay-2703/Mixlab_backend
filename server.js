@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
-// 📥 IMPORTS - Routes
+//  IMPORTS - Routes
 import authRouter from './routes/authRoutes.js';
 import lessonRoutes from './routes/lessonRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
@@ -17,12 +17,12 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
-// 📥 IMPORTS - Middleware
+// IMPORTS - Middleware
 import { authenticateToken } from './middleware/authMiddleware.js';
 import guestTracking from './middleware/guestTracking.js';
 import checkGuestAccess from './middleware/guestAccess.js';
 
-// 📥 IMPORTS - Controllers
+// IMPORTS - Controllers
 import {
   getGuestProfile,
   saveGameProgress,
@@ -36,7 +36,7 @@ dotenv.config();
 
 const app = express();
 
-// ⚙️ GLOBAL MIDDLEWARES
+// GLOBAL MIDDLEWARES
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -51,7 +51,7 @@ app.use(express.static('public'));
 
 // BASE ROUTES
 app.get('/', (req, res) => {
-  res.send('🎮 Game API is running');
+  res.send(' Game API is running');
 });
 
 app.get('/api/health', (_req, res) => {
