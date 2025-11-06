@@ -19,7 +19,7 @@ const validatePassword = (password) => {
 
 // Register Controller
 export const register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, role } = req.body;
 
   // Basic field check
   if (!username || !email || !password) {
@@ -46,20 +46,30 @@ export const register = async (req, res) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    // Hash password and insert user
+    // Hash password and insert user with role (default to 'student')
     const hashPassword = await bcrypt.hash(password, 10);
-    await db.query(
-      "INSERT INTO users(username, email, password) VALUES (?,?,?)",
-      [username, email, hashPassword]
+    const [result] = await db.query(
+      "INSERT INTO users(username, email, password, role) VALUES (?, ?, ?, ?)",
+      [username, email, hashPassword, role || 'student']
     );
 
-    res.status(201).json({ message: "User created successfully" });   
+    // Return created user info
+    res.status(201).json({ 
+      message: "User created successfully",
+      user: {
+        id: result.insertId,
+        username,
+        email,
+        role: role || 'student'
+      }
+    });   
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ 
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
-
-    
 };
 
 //LOGIN CONTROLLER
@@ -76,12 +86,26 @@ export const login = async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ message: "User not found" });
 
     const user = rows[0];
+    const userId = user.id ?? user.user_id; // support both schemas
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ message: "Incorrect password" });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign(
+      { id: userId, role: user.role },
+      process.env.JWT_SECRET || 'SECRET_KEY',
+      { expiresIn: '1d' }
+    );
 
-    res.json({ message: "Login successful", token });
+    const displayName = user.username || user.name || "";
+    res.json({ 
+      message: "Login successful", 
+      token,
+      user: {
+        id: userId,
+        name: displayName,
+        email: user.email
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -91,7 +115,7 @@ export const login = async (req, res) => {
 
 //password reset
 const OTP_EXPIRY_MINUTES = 10;
-let otpStore = {}; // temporary in-memory store: { email: { code, expiresAt } }
+let otpStore = {}; // { email: { code, expiresAt, verified?: boolean } }
 
 // FORGOT PASSWORD
 export const forgotPassword = async (req, res) => {
@@ -108,20 +132,30 @@ export const forgotPassword = async (req, res) => {
         const expiresAt = Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000;
         otpStore[email] = { code: otp, expiresAt };
 
-        // Send OTP via email
-        const transporter = nodemailer.createTransport({
-            service: "Gmail",
-            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-        });
+        // Send OTP via email (production) or return/log in development
+        try {
+            if (process.env.NODE_ENV === 'production' && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+                const transporter = nodemailer.createTransport({
+                    service: "Gmail",
+                    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+                });
 
-        await transporter.sendMail({
-            from: `"MixLab Studio" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Your OTP Code",
-            text: `Your OTP code is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes.`
-        });
+                await transporter.sendMail({
+                    from: `"MixLab Studio" <${process.env.EMAIL_USER}>`,
+                    to: email,
+                    subject: "Your OTP Code",
+                    text: `Your OTP code is : ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes.`
+                });
+                return res.json({ message: "OTP sent to your email" });
+            }
 
-        res.json({ message: "OTP sent to your email" });
+            // Development fallback: expose OTP for testing
+            console.log(`[DEV] OTP for ${email}: ${otp}`);
+            return res.json({ message: "OTP generated", otp });
+        } catch (mailErr) {
+            console.warn('Email send failed, returning OTP in response for testing:', mailErr?.message);
+            return res.json({ message: "OTP generated ", otp });
+        }
 
     } catch (err) {
         console.error(err);
@@ -142,6 +176,7 @@ export const verifyOtp = (req, res) => {
 
     if (otpStore[email].code !== otp) return res.status(400).json({ message: "Invalid OTP" });
 
+    otpStore[email].verified = true;
     res.json({ message: "OTP verified" });
 };
 
@@ -149,7 +184,9 @@ export const verifyOtp = (req, res) => {
 export const resetPassword = async (req, res) => {
     const { email, newPassword } = req.body;
 
-    if (!otpStore[email]) return res.status(400).json({ message: "OTP verification required" });
+    if (!otpStore[email] || otpStore[email].verified !== true) {
+        return res.status(400).json({ message: "OTP verification required" });
+    }
 
     try {
         const db = await connectToDatabase();
@@ -167,7 +204,20 @@ export const resetPassword = async (req, res) => {
     }
 };
 
-//LOGOUT
+// LOGOUT (stateless JWT: client should discard token; clear cookies if any)
+export const logout = (req, res) => {
+  try {
+    // Clear potential auth cookies if used anywhere
+    if (res.clearCookie) {
+      res.clearCookie('auth_token');
+      res.clearCookie('guest_id');
+    }
+    return res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('Logout error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
 
 
 
@@ -192,7 +242,7 @@ export const registerWithRole = async (req, res) => {
 
     res.status(201).json({ message: "User created successfully" });
   } catch (err) {
-    console.error(err);f
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -212,7 +262,7 @@ export const loginWithRole = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'SECRET_KEY',
       { expiresIn: "1d" }
     );
 

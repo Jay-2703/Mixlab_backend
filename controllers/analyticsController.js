@@ -1,76 +1,198 @@
-import { connectToDatabase } from '../config/db.js';
+import { Analytics } from '../models/analytics.js';
 
-// GET /analytics/revenue
-export const getRevenue = async (req, res) => {
+export const getDashboard = async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT 
-        DATE_FORMAT(date, '%Y-%m') AS month,
-        SUM(price) AS total_revenue
-      FROM bookings
-      WHERE status = 'completed'
-      GROUP BY month
-      ORDER BY month DESC
-    `);
-
-    res.json(rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching revenue data' });
-  }
-};
-
-// GET /analytics/student-engagement
-export const getStudentEngagement = async (req, res) => {
-  try {
-    const [activeStudents] = await db.query(`
-      SELECT COUNT(DISTINCT student_id) AS active_students
-      FROM bookings
-      WHERE date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-    `);
-
-    const [repeatStudents] = await db.query(`
-      SELECT COUNT(*) AS repeat_students FROM (
-        SELECT student_id FROM bookings
-        GROUP BY student_id
-        HAVING COUNT(*) > 1
-      ) AS sub
-    `);
-
-    const [totalStudents] = await db.query(`
-      SELECT COUNT(*) AS total_students FROM users WHERE role='student'
-    `);
-
+    console.log(' [getDashboard] Fetching dashboard');
+    const metrics = await Analytics.getDashboardSummary();
     res.json({
-      active_students: activeStudents[0].active_students,
-      repeat_students: repeatStudents[0].repeat_students,
-      total_students: totalStudents[0].total_students,
-      retention_rate: (
-        (repeatStudents[0].repeat_students / totalStudents[0].total_students) * 100
-      ).toFixed(2) + '%'
+      message: 'Dashboard metrics retrieved',
+      data: metrics
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching engagement data' });
+    console.error('[getDashboard] Error:', error.message);
+    res.status(500).json({ message: 'Error fetching dashboard', error: error.message });
   }
 };
 
-// GET /analytics/popular-slots
-export const getPopularSlots = async (req, res) => {
+export const getRevenue = async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT time, COUNT(*) AS bookings_count
-      FROM bookings
-      GROUP BY time
-      ORDER BY bookings_count DESC
-      LIMIT 5
-    `);
-
-    res.json(rows);
+    const { startDate, endDate, instructorId } = req.query;
+    console.log(' [getRevenue] Fetching revenue report:', { startDate, endDate, instructorId });
+    
+    const data = await Analytics.getRevenueReport({
+      startDate,
+      endDate,
+      instructorId
+    });
+    
+    res.json({
+      message: 'Revenue report retrieved',
+      ...data
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching popular slots' });
+    console.error(' [getRevenue] Error:', error.message);
+    res.status(500).json({ message: 'Error fetching revenue', error: error.message });
   }
 };
 
+export const getBookings = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    console.log(' [getBookings] Fetching booking statistics');
+    
+    const data = await Analytics.getBookingStatistics({
+      startDate,
+      endDate
+    });
+    
+    res.json({
+      message: 'Booking statistics retrieved',
+      data
+    });
+  } catch (error) {
+    console.error(' [getBookings] Error:', error.message);
+    res.status(500).json({ message: 'Error fetching bookings', error: error.message });
+  }
+};
 
+export const getStudentEngagement = async (req, res) => {
+  try {
+    console.log(' [getStudentEngagement] Fetching student engagement');
+    const data = await Analytics.getStudentEngagement();
+    
+    res.json({
+      message: 'Student engagement metrics retrieved',
+      total_students: data.length,
+      data
+    });
+  } catch (error) {
+    console.error('[getStudentEngagement] Error:', error.message);
+    res.status(500).json({ message: 'Error fetching engagement', error: error.message });
+  }
+};
+
+export const getLearningPerformance = async (req, res) => {
+  try {
+    console.log('[getLearningPerformance] Fetching learning performance');
+    const data = await Analytics.getLearningPerformance();
+    
+    res.json({
+      message: 'Learning performance metrics retrieved',
+      total_modules: data.length,
+      data
+    });
+  } catch (error) {
+    console.error('[getLearningPerformance] Error:', error.message);
+    res.status(500).json({ message: 'Error fetching learning performance', error: error.message });
+  }
+};
+
+export const getCustomerBehavior = async (req, res) => {
+  try {
+    console.log('[getCustomerBehavior] Fetching customer behavior');
+    const data = await Analytics.getCustomerBehavior();
+    
+    res.json({
+      message: 'Customer behavior analysis retrieved',
+      total_customers: data.length,
+      data
+    });
+  } catch (error) {
+    console.error(' [getCustomerBehavior] Error:', error.message);
+    res.status(500).json({ message: 'Error fetching customer behavior', error: error.message });
+  }
+};
+
+export const exportReport = async (req, res) => {
+  try {
+    const { format = 'json', reportType = 'dashboard' } = req.query;
+    console.log(' [exportReport] Exporting report:', { format, reportType });
+    
+    let data;
+    
+    switch (reportType) {
+      case 'revenue':
+        data = await Analytics.getRevenueReport();
+        break;
+      case 'bookings':
+        data = await Analytics.getBookingStatistics();
+        break;
+      case 'engagement':
+        data = await Analytics.getStudentEngagement();
+        break;
+      case 'learning':
+        data = await Analytics.getLearningPerformance();
+        break;
+      case 'behavior':
+        data = await Analytics.getCustomerBehavior();
+        break;
+      default:
+        data = await Analytics.getDashboardSummary();
+    }
+    
+    if (format === 'csv') {
+      const csv = convertToCSV(data.data || data);
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="report_${reportType}_${Date.now()}.csv"`);
+      res.send(csv);
+    } else {
+      res.json({
+        message: 'Report exported',
+        format: 'json',
+        reportType,
+        data
+      });
+    }
+  } catch (error) {
+    console.error('[exportReport] Error:', error.message);
+    res.status(500).json({ message: 'Error exporting report', error: error.message });
+  }
+};
+
+export const logActivity = async (req, res) => {
+  try {
+    const { userId, action, resourceType, resourceId } = req.body;
+    const ipAddress = req.ip;
+    const userAgent = req.get('user-agent');
+    
+    console.log(' [logActivity] Logging:', { userId, action, resourceType });
+    
+    if (!action || !resourceType) {
+      return res.status(400).json({ message: 'action and resourceType are required' });
+    }
+    
+    const result = await Analytics.logActivity({
+      userId,
+      action,
+      resourceType,
+      resourceId,
+      ipAddress,
+      userAgent
+    });
+    
+    res.status(201).json({ message: 'Activity logged', result });
+  } catch (error) {
+    console.error('[logActivity] Error:', error.message);
+    res.status(500).json({ message: 'Error logging activity', error: error.message });
+  }
+};
+
+function convertToCSV(data) {
+  if (!Array.isArray(data)) {
+    data = [data];
+  }
+  
+  if (data.length === 0) return '';
+  
+  const headers = Object.keys(data[0]);
+  const csv = [headers.join(',')];
+  
+  data.forEach(row => {
+    csv.push(headers.map(header => {
+      const value = row[header];
+      return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+    }).join(','));
+  });
+  
+  return csv.join('\n');
+}

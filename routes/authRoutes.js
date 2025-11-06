@@ -1,6 +1,6 @@
 import express from 'express';
 import { login, register } from '../controllers/authController.js';
-import { forgotPassword, verifyOtp, resetPassword  } from '../controllers/authController.js';
+import { forgotPassword, verifyOtp, resetPassword, logout } from '../controllers/authController.js';
 
 
 
@@ -17,6 +17,7 @@ router.post('/login', login);
 router.post('/forgot-password', forgotPassword);   // send OTP
 router.post('/verify-otp', verifyOtp);            // check OTP
 router.post('/reset-password', resetPassword);    // set new password
+router.post('/logout', logout);
 
 
 

@@ -1,31 +1,45 @@
-// models/badgeModel.js
-import {connectToDatabase} from "../config/db.js";
+import { connectToDatabase } from '../config/db.js';
 
 export const Badge = {
-  // Get all badges
   getAll: async () => {
-    const [rows] = await connectToDatabase.query("SELECT * FROM badges");
-    return rows;
+    const db = await connectToDatabase();
+    const [rows] = await db.query('SELECT * FROM badges ORDER BY badge_id ASC');
+    return rows || [];
   },
 
-  // Get badges earned by a specific user
-  getByUser: async (userId) => {
-    const [rows] = await connectToDatabase.query(
-      `SELECT b.* 
-       FROM user_badges ub 
-       JOIN badges b ON ub.badge_id = b.id 
-       WHERE ub.user_id = ?`,
+  getUserBadges: async (userId) => {
+    const db = await connectToDatabase();
+    const [rows] = await db.query(
+      'SELECT b.* FROM badges b JOIN user_badges ub ON b.badge_id = ub.badge_id WHERE ub.user_id = ? ORDER BY ub.earned_at DESC',
       [userId]
     );
-    return rows;
+    return rows || [];
   },
 
-  // Add a new badge (admin use)
-  create: async ({ name, description, points_required, image_url }) => {
-    const [result] = await connectToDatabase.query(
-      "INSERT INTO badges (name, description, points_required, image_url) VALUES (?, ?, ?, ?)",
-      [name, description, points_required, image_url]
+  earnBadge: async (userId, badgeId) => {
+    const db = await connectToDatabase();
+    
+    // Check if already earned
+    const [existing] = await db.query(
+      'SELECT * FROM user_badges WHERE user_id = ? AND badge_id = ?',
+      [userId, badgeId]
     );
-    return { id: result.insertId, name, description, points_required, image_url };
+    if (existing && existing[0]) return { message: 'Badge already earned' };
+    
+    const [result] = await db.query(
+      'INSERT INTO user_badges (user_id, badge_id, earned_at) VALUES (?, ?, NOW())',
+      [userId, badgeId]
+    );
+    
+    return { userId, badgeId, earned_at: new Date() };
+  },
+
+  createBadge: async ({ name, description, iconUrl, xpRequirement = 0 }) => {
+    const db = await connectToDatabase();
+    const [result] = await db.query(
+      'INSERT INTO badges (name, description, icon_url, xp_requirement, created_at) VALUES (?, ?, ?, ?, NOW())',
+      [name, description, iconUrl, xpRequirement]
+    );
+    return { badge_id: result.insertId, name, description, iconUrl, xpRequirement };
   },
 };

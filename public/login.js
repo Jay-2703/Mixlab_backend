@@ -1,25 +1,35 @@
+import { apiCall } from 'api.js';
 
 const form = document.getElementById('loginform');
 
-form.addEventListener("submit", async (e)=> {
+if (form) {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
 
-const username = document.getElementById('email').value;
-const password = document.getElementById('password').value;
+    if (!email || !password) {
+      alert('Email and password are required');
+      return;
+    }
 
-try{
-    const response = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({email, password})
-    });
+    try {
+      const response = await apiCall('/auth/login', 'POST', {
+        email,
+        password
+      });
 
-    const data = await response.json();
-    alert(data.message);
-}catch(error){
-    alert("Error: could not connect to the server.");
-    console.error(error)
+      // Store token and user data
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
 
+      alert(response.message);
+      
+      // Redirect to dashboard or home
+      window.location.href = 'dashboard.html';
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  });
 }
-});

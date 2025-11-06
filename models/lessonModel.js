@@ -10,27 +10,27 @@ export const Lesson = {
 
   getById: async (id) => {
     const db = await connectToDatabase();
-    const [rows] = await db.query("SELECT * FROM lessons WHERE id = ?", [id]);
+    const [rows] = await db.query("SELECT * FROM lessons WHERE `lesson_id` = ?", [id]);
     return rows[0];
   },
 
   submitQuiz: async (lessonId, userId, score) => {
     const db = await connectToDatabase();
 
-    // 1️⃣ Save quiz progress
+    //  Save quiz progress
     await db.query(
       "INSERT INTO lesson_progress (lesson_id, user_id, score, completed) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE score = ?, completed = 1",
       [lessonId, userId, score, score]
     );
 
-    // 2️⃣ Calculate total points
+    //  Calculate total points
     const [progress] = await db.query(
       "SELECT SUM(score) AS total_points FROM lesson_progress WHERE user_id = ?",
       [userId]
     );
     const totalPoints = progress[0].total_points || 0;
 
-    // 3️⃣ Assign badges
+    // Assign badges
     const [badges] = await db.query(
       "SELECT * FROM badges WHERE points_required <= ?",
       [totalPoints]
@@ -43,7 +43,7 @@ export const Lesson = {
       );
     }
 
-    // 4️⃣ Return response
+    // Return response
     return {
       message: "Quiz submitted successfully!",
       totalPoints,

@@ -1,6 +1,3 @@
-// ============================================
-// FILE: middleware/guestTracking.js
-// ============================================
 import { connectToDatabase } from '../config/db.js';
 import crypto from 'crypto';
 
@@ -17,7 +14,7 @@ const guestTracking = async (req, res, next) => {
       res.cookie('guest_id', guestId, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
       });
 

@@ -15,7 +15,7 @@ if (forgotForm) {
     console.log("Sending OTP to:", userEmail);
 
     try {
-      const res = await fetch("http://localhost:3000/auth/forgot-password", {
+      const res = await fetch("http://localhost:3000/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail })
@@ -36,7 +36,7 @@ if (otpForm) {
 
 
     try {
-      const res = await fetch("http://localhost:3000/auth/verify-otp", {
+      const res = await fetch("http://localhost:3000/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail, otp })
@@ -82,7 +82,7 @@ if (resetForm) {
     console.log("🔑 Resetting password for:", userEmail);
 
     try {
-      const res = await fetch("http://localhost:3000/auth/reset-password", {
+      const res = await fetch("http://localhost:3000/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail, newPassword })
@@ -102,3 +102,4 @@ if (resetForm) {
 }
 
 
+np

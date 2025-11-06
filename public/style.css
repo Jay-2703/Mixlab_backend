@@ -1,3 +1,6 @@
+/*account-created -start , register -start, login -start */
+
+
 * {
   margin: 0;
   padding: 0;
@@ -15,8 +18,7 @@ body {
   min-height: 100vh;
   background-image: radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.07), transparent 60%),
                     radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.07), transparent 60%);
-  padding: 80px 20px; /* Adds top and bottom spacing */
-}
+  padding: 80px 20px; }
 
 /* Wrapper to center everything */
 .wrapper {
@@ -77,6 +79,13 @@ body {
   gap: 18px;
 }
 
+/*account-created -end , register, login */
+
+
+
+/* register -end, login -end */
+
+
 .input-group label {
   display: block;
   font-weight: 600;
@@ -101,6 +110,7 @@ body {
   box-shadow: 0 0 6px #ffd700;
 }
 
+/*account-created - start */
 
 /* Main Register Button */
 .btn-primary {
@@ -120,6 +130,9 @@ body {
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
 }
 
+/*account-created - end */
+
+/* login - start */
 /*forgot password? */ 
 .pass-reset, .btn-back a{
   text-decoration: none;
@@ -149,6 +162,7 @@ body {
   font-weight: 600;
 }
 
+/* login - end */
 
 
 /* Divider Line */
