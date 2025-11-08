@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Send Code</title>
+  <title>Verify OTP</title>
   <link rel="stylesheet" href="verify-otp.css" />
 </head>
 <body>
@@ -11,16 +11,15 @@
     <div class="code-verification-card">
       <h1>Verify Your Code</h1>
 
-      <form id="otpForm" class="form">
+      <form id="otpForm" class="form" action="/FrontEnd/Reset_password/reset_password.html">
         <div class="input-group">
           <input type="text" id="code" name="code" placeholder="Enter your code" required />
         </div>
 
         <button type="submit" class="btn-primary">Verify</button>
-        <button type="button" class="btn-back" onclick="window.location.href='pass-reset.html'">Back</button>
+        <button type="button" class="btn-back" onclick="window.location.href='/FrontEnd/Forgot_password/forgot_password.html'">Back</button>
       </form>
     </div>
   </div>
-
 </body>
 </html>

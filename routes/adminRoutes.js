@@ -139,11 +139,7 @@ router.get('/appointments', validatePagination, getAllAppointments);
 router.put('/appointments/:id/status', updateAppointmentStatus);
 
 // ============ INSTRUCTOR MANAGEMENT ============
-/**
- * GET /api/admin/instructors
- * Retrieves all instructors with optional pagination
- * Query params: ?page=1&limit=20
- */
+
 router.get('/instructors', validatePagination, getInstructors);
 
 /**

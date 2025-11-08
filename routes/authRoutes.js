@@ -1,29 +1,32 @@
+
 import express from 'express';
-import { login, register } from '../controllers/authController.js';
-import { forgotPassword, verifyOtp, resetPassword, logout } from '../controllers/authController.js';
+import { 
+  register, 
+  login, 
+  forgotPassword, 
+  verifyOTP, 
+  resetPassword,
+  logout
+  
+} from '../controllers/authController.js';
+import { 
+  validateRegister, 
+  validateLogin, 
+  validateEmail, 
+  validateOTP, 
+  validateResetPassword 
+} from '../middleware/authValidation.js';
 
-
-
-
-//Guest
-import guestTracking from '../middleware/guestTracking.js';
-//import { registerUser, loginUser } from '../controllers/authController.js';
 
 const router = express.Router();
 
-// Auth routes and password reset - DONE TESTING
-router.post('/register', register);
-router.post('/login', login);
-router.post('/forgot-password', forgotPassword);   // send OTP
-router.post('/verify-otp', verifyOtp);            // check OTP
-router.post('/reset-password', resetPassword);    // set new password
+router.post('/register', validateRegister, register);
+router.post('/login', validateLogin, login);
+router.post('/forgot-password', validateEmail, forgotPassword);
+router.post('/verify-otp', validateOTP, verifyOTP);
+router.post('/reset-password', validateResetPassword, resetPassword);
 router.post('/logout', logout);
 
-
-
-//GUEST 
-//router.post('/register', guestTracking, registerUser);
-//router.post('/login', guestTracking, loginUser);
 
 
 

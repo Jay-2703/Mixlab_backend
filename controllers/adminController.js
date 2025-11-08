@@ -1,6 +1,6 @@
 import { connectToDatabase } from '../config/db.js';
 
-// ============ DASHBOARD METRICS ============
+//DASHBOARD METRICS
 
 export const getDashboardMetrics = async (req, res) => {
   try {
@@ -22,9 +22,6 @@ export const getDashboardMetrics = async (req, res) => {
       'SELECT COUNT(*) as count FROM bookings WHERE status = "completed"'
     );
 
-    // FIX: payments table doesn't exist in your schema - removed this query
-    // If you need revenue tracking, you'll need to add a payments table
-
     const [activeLessons] = await connection.query(
       'SELECT COUNT(*) as count FROM lessons WHERE 1=1'
     );
@@ -43,7 +40,7 @@ export const getDashboardMetrics = async (req, res) => {
       LIMIT 5`
     );
 
-    //// await connection.end();
+    await connection.end();
 
     return res.json({
       success: true,
@@ -71,7 +68,7 @@ export const getDashboardMetrics = async (req, res) => {
   }
 };
 
-// ============ USER MANAGEMENT ============
+//USER MANAGEMENT 
 
 export const getAllUsers = async (req, res) => {
   let connection;
@@ -107,9 +104,9 @@ export const getAllUsers = async (req, res) => {
       message: 'Error fetching users',
       error: error.message,
     });
-  } //finally {
-   // if (connection) await connection.end(); // Always close connection safely
-  //}
+  } finally {
+   if (connection) await connection.end(); // Always close connection safely
+  }
 };
 
 
@@ -124,7 +121,7 @@ export const getUserById = async (req, res) => {
       [id]
     );
 
-    //await connection.end();
+    await connection.end();
 
     if (!user.length) {
       return res.status(404).json({
@@ -154,7 +151,7 @@ export const updateUser = async (req, res) => {
     const { username, email, role } = req.body;
 
     if (!username || !email || !role) {
-      //await connection.end();
+      await connection.end();
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: username, email, role',
@@ -166,7 +163,7 @@ export const updateUser = async (req, res) => {
       [username, email, role, id]
     );
 
-    //await connection.end();
+    await connection.end();
 
     if (result.affectedRows === 0) {
       return res.status(404).json({
@@ -197,7 +194,7 @@ export const deleteUser = async (req, res) => {
 
     const [result] = await connection.query('DELETE FROM users WHERE id = ?', [id]);
 
-   // await connection.end();
+    await connection.end();
 
     if (result.affectedRows === 0) {
       return res.status(404).json({
@@ -220,7 +217,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// ============ LESSON/MODULE MANAGEMENT ============
+// LESSON/MODULE MANAGEMENT 
 
 export const getAllLessons = async (req, res) => {
   try {
@@ -241,7 +238,7 @@ export const getAllLessons = async (req, res) => {
     query += ' ORDER BY created_at DESC';
     const [lessons] = await connection.query(query, params);
 
-    // await connection.end();
+    await connection.end();
 
     return res.json({
       success: true,
@@ -385,7 +382,7 @@ export const generateReport = async (req, res) => {
       params
     );
 
-    // ✅ FIX: Removed revenue query (payments table doesn't exist)
+    // FIX: Removed revenue query (payments table doesn't exist)
 
     const [engagementData] = await connection.query(
       'SELECT COUNT(DISTINCT user_id) as active_students, ' +
@@ -394,7 +391,7 @@ export const generateReport = async (req, res) => {
       params
     );
 
-    // await connection.end();
+    await connection.end();
 
     return res.json({
       success: true,
@@ -419,8 +416,6 @@ export const getRevenueAnalytics = async (req, res) => {
   try {
     const connection = await connectToDatabase();
 
-    // ✅ FIX: Removed payments queries since table doesn't exist
-    // You'll need to create a payments table if you want revenue tracking
     
     const [topInstructors] = await connection.query(
       'SELECT u.id, u.username, COUNT(b.booking_id) as bookings ' +
@@ -431,7 +426,7 @@ export const getRevenueAnalytics = async (req, res) => {
       'GROUP BY u.id ORDER BY bookings DESC LIMIT 10'
     );
 
-    // await connection.end();
+    await connection.end();
 
     return res.json({
       success: true,
@@ -450,14 +445,13 @@ export const getRevenueAnalytics = async (req, res) => {
   }
 };
 
-// ============ APPOINTMENT MANAGEMENT ============
+//  APPOINTMENT MANAGEMENT 
 
 export const getAllAppointments = async (req, res) => {
   try {
     const connection = await connectToDatabase();
     const { status, instructor_id } = req.query;
 
-    // ✅ FIX: Updated to match actual schema structure
     let query = `
       SELECT 
         b.booking_id, 
@@ -490,7 +484,7 @@ export const getAllAppointments = async (req, res) => {
     query += ' ORDER BY b.booking_date DESC';
     const [appointments] = await connection.query(query, params);
 
-    // await connection.end();
+    await connection.end();
 
     return res.json({
       success: true,
@@ -515,20 +509,19 @@ export const updateAppointmentStatus = async (req, res) => {
 
     const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
     if (!validStatuses.includes(status)) {
-      // await connection.end();
+      await connection.end();
       return res.status(400).json({
         success: false,
         message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
       });
     }
 
-    // ✅ FIX: Changed to booking_id
     const [result] = await connection.query(
       'UPDATE bookings SET status = ? WHERE booking_id = ?',
       [status, id]
     );
 
-    // await connection.end();
+    await connection.end();
 
     if (result.affectedRows === 0) {
       return res.status(404).json({
@@ -551,7 +544,7 @@ export const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-// ============ INSTRUCTOR MANAGEMENT ============
+//  INSTRUCTOR MANAGEMENT 
 
 export const addInstructor = async (req, res) => {
   try {
@@ -559,7 +552,7 @@ export const addInstructor = async (req, res) => {
     const { username, email, password, first_name, last_name, specialization } = req.body;
 
     if (!username || !email || !password || !first_name || !last_name) {
-      // await connection.end();
+      await connection.end();
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: username, email, password, first_name, last_name',
@@ -573,7 +566,7 @@ export const addInstructor = async (req, res) => {
     );
 
     if (existingUser.length > 0) {
-      // await connection.end();
+       await connection.end();
       return res.status(409).json({
         success: false,
         message: 'Email already exists',
@@ -589,14 +582,13 @@ export const addInstructor = async (req, res) => {
 
     const userId = userResult.insertId;
 
-    // ✅ FIX: Create instructor record with proper fields
     await connection.query(
       'INSERT INTO instructors (user_id, first_name, last_name, specialization, is_active, created_at) ' +
       'VALUES (?, ?, ?, ?, 1, NOW())',
       [userId, first_name, last_name, specialization || null]
     );
 
-    // await connection.end();
+    await connection.end();
 
     return res.status(201).json({
       success: true,
@@ -617,7 +609,6 @@ export const getInstructors = async (req, res) => {
   try {
     const connection = await connectToDatabase();
 
-    // ✅ FIX: Join with instructors table to get full details
     const [instructors] = await connection.query(
       'SELECT u.id, u.username, u.email, i.first_name, i.last_name, i.specialization, i.is_active, u.created_at ' +
       'FROM users u ' +
@@ -625,7 +616,7 @@ export const getInstructors = async (req, res) => {
       'WHERE u.role = "instructor" ORDER BY u.username ASC'
     );
 
-    // await connection.end();
+    await connection.end();
 
     return res.json({
       success: true,

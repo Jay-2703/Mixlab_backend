@@ -217,6 +217,29 @@ body {
     align-items: center;
 }
 
+.connection-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #c23a3a;
+    display: inline-block;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+.connection-indicator.connected {
+    background: #4caf50;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
 /* Buttons */
 .action-btn {
     background: var(--primary-color);

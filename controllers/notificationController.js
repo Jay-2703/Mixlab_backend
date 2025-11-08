@@ -6,7 +6,7 @@ export const sendNotification = async (req, res) => {
   try {
     const { userId, title, message, type = 'system' } = req.body;
     
-    console.log('📊 [sendNotification] Received:', { userId, title, message, type });
+    console.log(' [sendNotification] Received:', { userId, title, message, type });
     
     if (!userId || !title || !message) {
       return res.status(400).json({ 
@@ -20,7 +20,7 @@ export const sendNotification = async (req, res) => {
       notification 
     });
   } catch (error) {
-    console.error('❌ [sendNotification] Error:', error.message);
+    console.error(' [sendNotification] Error:', error.message);
     res.status(500).json({ 
       message: 'Error sending notification', 
       error: error.message 

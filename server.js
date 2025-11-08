@@ -19,18 +19,7 @@ import adminRoutes from './routes/adminRoutes.js';
 
 // IMPORTS - Middleware
 import { authenticateToken } from './middleware/authMiddleware.js';
-import guestTracking from './middleware/guestTracking.js';
-import checkGuestAccess from './middleware/guestAccess.js';
-
-// IMPORTS - Controllers
-import {
-  getGuestProfile,
-  saveGameProgress,
-  getGuestGameHistory,
-  createGuestBooking,
-  getGuestBookings,
-  cancelGuestBooking,
-} from './controllers/guestController.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'; //error handling 
 
 dotenv.config();
 
@@ -39,9 +28,22 @@ const app = express();
 // GLOBAL MIDDLEWARES
 app.use(express.json());
 app.use(cookieParser());
+// CORS: allow specific client origins (add Live Server origin used during frontend dev)
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'http://127.0.0.1:5500',
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: function (origin, callback) {
+      // allow non-browser requests (like curl, or same-origin requests from tools)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+      return callback(new Error('CORS policy: Origin not allowed'), false);
+    },
     credentials: true,
   })
 );
@@ -51,7 +53,7 @@ app.use(express.static('public'));
 
 // BASE ROUTES
 app.get('/', (req, res) => {
-  res.send(' Game API is running');
+  res.send('API is running');
 });
 
 app.get('/api/health', (_req, res) => {
@@ -98,53 +100,11 @@ app.get(`${API_BASE}/profile`, authenticateToken, (req, res) => {
   res.json({ message: 'This is protected', user: req.user });
 });
 
-// GUEST ROUTES (No Auth Required)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
-// Guest Profile
-app.get(`${API_BASE}/guest/profile`, guestTracking, getGuestProfile);
 
-// Guest Game History
-app.get(`${API_BASE}/guest/history`, guestTracking, getGuestGameHistory);
 
-// Save Guest Game Progress
-app.post(`${API_BASE}/guest/progress/:gameId`, guestTracking, saveGameProgress);
-
-// Play Game (guest access rules)
-app.get(
-  `${API_BASE}/lessons/play/:lessonId`,
-  guestTracking,
-  checkGuestAccess,
-  (req, res) => {
-    res.json({
-      success: true,
-      lesson: req.lessonData,
-      message: 'Access granted',
-    });
-  }
-);
-
-// Guest Bookings
-app.post(`${API_BASE}/guest/bookings`, guestTracking, createGuestBooking);
-app.get(`${API_BASE}/guest/bookings`, guestTracking, getGuestBookings);
-app.delete(`${API_BASE}/guest/bookings/:bookingId`, guestTracking, cancelGuestBooking);
-
-// 404 Not Found Handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Route not found',
-    path: req.path,
-    method: req.method,
-  });
-});
-
-// ERROR HANDLING MIDDLEWARE
-app.use((err, req, res, next) => {
-  console.error(' Error:', err.stack);
-  res.status(err.status || 500).json({
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined,
-  });
-});
 
 //  START SERVER
 const PORT = process.env.PORT || 3000;

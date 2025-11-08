@@ -17,13 +17,13 @@ body {
 }
 
 .container{
-      max-width:1200px;
-      margin:0 auto;
-      padding:12px 20px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
+  max-width:1200px;
+  margin:0 auto;
+  padding:12px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
 }
 
 .site-header{
@@ -54,31 +54,37 @@ body {
 
 
 /* Main nav - desktop */
+/* Main nav - desktop (clean modern layout)
+   - logo sits at far left, nav links follow, account actions on right */
 nav.primary{
-    display:flex;
-    align-items:center;
-    gap:18px;flex:1;
-    justify-content:center
+  display:flex;
+  align-items:center;
+  gap:20px;
+  flex:1;
+  justify-content:flex-start; /* keep nav left of center so logo + nav read naturally */
 }
 
-
 nav.primary a{
-    color:inherit;
-    text-decoration:none;
-    padding:8px 10px;
-    border-radius:8px;
-    font-weight:600;
-    font-size: 25px;
-    opacity:0.9;
-    white-space: nowrap;
-    
-  }
-  
+  color:inherit;
+  text-decoration:none;
+  padding:8px 12px;
+  border-radius:6px;
+  font-weight:600;
+  font-size: 15px; /* compact */
+  opacity:0.95;
+  white-space: nowrap;
+  transition: color .18s ease, background .18s ease, transform .06s ease;
+}
+
 nav.primary a:hover{
-    background:rgba(255,255,255,0.04);
-    color: #bfa45b;
-    opacity:1
-  }
+  background: rgba(255,255,255,0.03);
+  color: #bfa45b;
+  transform: translateY(-2px);
+}
+
+/* Ensure logo and nav spacing */
+.brand { display:flex; align-items:center; gap:12px; }
+.logo img { height:56px; display:block; }
 
   
 /* Dropdown */
@@ -103,21 +109,22 @@ nav.primary a:hover{
 }
 
 .account {
-  font-size: 18px;
+  font-size: 14px;
   color: #bfa45b;
   background: transparent;
   border: 1.5px solid #bfa45b;
-  padding: 12px 25px;
-  border-radius: 5px;
-  font-weight: bold;
-  letter-spacing: 2px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.5 ease;
+  transition: background .18s ease, transform .12s ease;
 }
 
 .account:hover {
   background: #bfa45b;
-  color: #ffffff;
+  color: #111;
+  transform: translateY(-2px);
 }
 
 
@@ -125,27 +132,29 @@ nav.primary a:hover{
 /* -------------------- */
 .hamburger {
   display: none;
-  font-size: 28px;
+  font-size: 26px;
   background: none;
   border: none;
   color: #bfa45b;
   cursor: pointer;
 }
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 50%;
-  height: 100vh;
-  background: #0b0b0b;
-  box-shadow: -4px 0 15px rgba(0,0,0,0.5);
-  transition: right 0.4s ease;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  padding: 40px 20px;
-}
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 50%;
+    max-width: 360px;
+    height: 100vh;
+    background: linear-gradient(180deg,#0b0b0b,#070707);
+    box-shadow: -8px 0 30px rgba(0,0,0,0.6);
+    transition: right 0.35s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 18px;
+    gap:12px;
+  }
 
 .sidebar.active {
   right: 0;

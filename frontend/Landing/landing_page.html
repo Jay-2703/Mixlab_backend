@@ -21,10 +21,36 @@
   <link rel="stylesheet" href="gallery.css">
   <link rel="stylesheet" href="contact.css"> <!--CONTACT, FOOTER AND MESSAGES -->
   <link rel="stylesheet" href="about.css">
+  <style>
+    /* Small header styles to match site theme and ensure good contrast */
+    .site-header .account,
+    .site-header .logout-link {
+      font-weight: 600;
+      color: #bfa45b; /* match header gold */
+      text-decoration: none;
+      margin-left: 10px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      display: inline-block;
+      vertical-align: middle;
+      background: transparent;
+      border: 1.5px solid transparent;
+    }
 
+    /* Make logout clearly visible on dark header: gold border and text */
+    .site-header .logout-link {
+      background: transparent;
+      color: #bfa45b;
+      border-color: #bfa45b;
+    }
 
-    <!-- Pallete -->
-
+    .site-header .account:hover,
+    .site-header .logout-link:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      background: rgba(191,164,91,0.12);
+    }
+  </style>
 
 </head>
 
@@ -37,35 +63,36 @@
       <!-- Brand / Logo -->
       <div class="brand">
         <div class="logo">
-          <img src="Logo/Logo Pahaba.png" height="80" alt="MixLab Logo">
+          <a href="landing_page.html" aria-label="MixLab Home">
+            <img src="Logo/Logo Pahaba.png" height="80" alt="MixLab Logo">
+          </a>
         </div>
       </div>
 
       <!-- Navigation -->
       <nav class="primary" role="navigation" aria-label="Primary">
-        <a href="#">Mixlab Music</a>
-
+  <!-- brand text removed; logo links home instead -->
         <ul class="services">
           <li>
-            <a href="#">SERVICES</a>
+            <a href="#services">SERVICES</a>
             <ul class="dropdown-menu">
-              <li><a href="#">Rehearsal Space</a></li>
-              <li><a href="#">Recording</a></li>
-              <li><a href="#">Music Lesson</a></li>
-              <li><a href="#">Dance Studio</a></li>
-              <li><a href="#">Music Arrangement</a></li>
-              <li><a href="#">Voiceover/Dubbing</a></li>
+              <li><a href="#services">Rehearsal Space</a></li>
+              <li><a href="#services">Recording</a></li>
+              <li><a href="#services">Music Lesson</a></li>
+              <li><a href="#services">Dance Studio</a></li>
+              <li><a href="#services">Music Arrangement</a></li>
+              <li><a href="#services">Voiceover/Dubbing</a></li>
             </ul>
           </li>
         </ul>
 
-        <a href="#">SUPPORT</a>
-        <a href="#">BLOG</a>
-        <a href="#">ABOUT</a>
+        <a href="#contact">SUPPORT</a>
+        <a href="#about">ABOUT</a>
       </nav>
 
-      <!-- Account -->
-      <div class="account">ACCOUNT</div>
+  <!-- Account -->
+  <a id="accountLink" href="../login/login.html" class="account">Account</a>
+  <a id="logoutLink" href="../login/login.html" class="logout-link" style="margin-left:12px; text-decoration:none;">Logout</a>
 
       <!-- Hamburger button -->
       <button id="menu-toggle" class="hamburger" aria-label="Open Menu">☰</button>
@@ -78,25 +105,24 @@
     <nav class="mobile-nav">
       <h2>MixLab Music Studio</h2>
 
-      <div class="menu-section">
+  <div class="menu-section">
         <div class="menu-title">
           SERVICES <span class="toggle" id="toggle-products">−</span>
         </div>
 
         <ul class="submenu" id="submenu-products">
-          <li><a href="#">Rehearsal Space</a></li>
-          <li><a href="#">Recording</a></li>
-          <li><a href="#">Music Lesson</a></li>
-          <li><a href="#">Dance Studio</a></li>
-          <li><a href="#">Music Arrangement</a></li>
-          <li><a href="#">Voiceover/Dubbing</a></li>
+          <li><a href="#services">Rehearsal Space</a></li>
+          <li><a href="#services">Recording</a></li>
+          <li><a href="#services">Music Lesson</a></li>
+          <li><a href="#services">Dance Studio</a></li>
+          <li><a href="#services">Music Arrangement</a></li>
+          <li><a href="#services">Voiceover/Dubbing</a></li>
         </ul>
       </div>
 
-      <a href="#">Support</a>
-      <a href="#">Blog</a>
-      <a href="#">About</a>
-      <a href="#" class="mobile-account">Account</a>
+      <a href="#contact">Support</a>
+      <a href="#about">About</a>
+      <a href="../login/login.html" class="mobile-account">Account</a>
     </nav>
   </aside>
 
@@ -121,7 +147,7 @@
   </div>
 
     <!-- ================= ABOUT ================= -->
-  <section class="app-section">
+    <section id="about" class="app-section">
     <div class="app-container">
 
     <div class="child-left">
@@ -331,7 +357,81 @@
 
   <audio id="sampleAudio" src="https://cdn.simple-mock-audio.example/sample.mp3"></audio>
 
+  <script>
+    (function () {
+      // Elements
+      const logoutLink = document.getElementById('logoutLink');
+      const accountLink = document.getElementById('accountLink');
+      const mobileAccount = document.querySelector('.mobile-account');
 
+      // Helper to extract display name from stored user object
+      function getDisplayName(user) {
+        if (!user) return null;
+        return user.username || user.name || user.fullname || user.email || null;
+      }
+
+      // Populate account link if user is logged in (login.js stores 'user' in localStorage)
+      try {
+        const raw = localStorage.getItem('user');
+        if (raw) {
+          let parsed = null;
+          try { parsed = JSON.parse(raw); } catch (e) { parsed = null; }
+          const name = getDisplayName(parsed);
+          if (name && accountLink) {
+            accountLink.textContent = name;
+            // link to profile page
+            accountLink.setAttribute('href', '../Account-created/profile.html');
+            accountLink.setAttribute('title', 'View your profile');
+          }
+          if (name && mobileAccount) {
+            mobileAccount.textContent = name;
+            mobileAccount.setAttribute('href', '../Account-created/profile.html');
+          }
+          // show logout for authenticated users
+          if (logoutLink) {
+            logoutLink.style.display = 'inline-block';
+          }
+        } else {
+          // not logged in: ensure links point to login and hide logout
+          if (accountLink) accountLink.setAttribute('href', '../login/login.html');
+          if (mobileAccount) mobileAccount.setAttribute('href', '../login/login.html');
+          if (logoutLink) {
+            logoutLink.style.display = 'none';
+          }
+        }
+      } catch (err) {
+        // ignore parsing errors
+        if (logoutLink) logoutLink.style.display = 'none';
+      }
+
+      // Logout behaviour: clears storage and redirects to login (mirrors admin)
+      if (logoutLink) {
+        logoutLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (confirm('Are you sure you want to logout?')) {
+            try { localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.clear(); } catch (err) { /* ignore */ }
+            // redirect to login
+            window.location.href = '../login/login.html';
+          }
+        });
+      }
+
+      // Normalize mobile submenu links
+      try {
+        document.querySelectorAll('#submenu-products a').forEach(a => a.setAttribute('href', '#services'));
+        document.querySelectorAll('.mobile-nav a').forEach(a => {
+          const t = (a.textContent || '').toLowerCase();
+          if (t.includes('support')) a.setAttribute('href', '#contact');
+          if (t.includes('about')) a.setAttribute('href', '#about');
+          if (t.includes('blog')) a.setAttribute('href', '#');
+        });
+      } catch (err) {
+        // silent
+      }
+    })();
+  </script>
+
+  <script src="booking.js"></script>
 
 
 </body>

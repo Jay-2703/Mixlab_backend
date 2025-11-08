@@ -1,6 +1,4 @@
-// ============================================
 // FILE: routes/gameRoutes.js
-// ============================================
 import express from 'express';
 import guestTracking from '../middleware/guestTracking.js';
 import checkGuestAccess from '../middleware/guestAccess.js';

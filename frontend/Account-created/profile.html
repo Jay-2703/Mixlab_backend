@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - MixLab</title>
+  <style>
+    body { font-family: Poppins, system-ui, Arial; background: linear-gradient(to bottom,#0b1220,#000); color: #fff; margin:0; }
+    .container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+    .card { background: rgba(30,30,30,0.6); border: 1px solid rgba(191,164,91,0.12); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+    h1,h2,h3{ margin:0 0 8px 0; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .btn { background: transparent; border: 1.5px solid #bfa45b; color: #bfa45b; padding:8px 12px; border-radius:8px; cursor:pointer; text-decoration:none; }
+    .btn:hover { background: rgba(191,164,91,0.12); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .list { list-style:none; padding-left:0; color:#ddd; }
+    .muted { color:#aaa; font-size:0.95rem; }
+    @media (max-width:720px){ .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1 id="displayName">Profile</h1>
+        <div id="email" class="muted"></div>
+      </div>
+      <div>
+        <a id="backHome" class="btn" href="../Landing/landing_page.html">Back</a>
+        <button id="profileLogout" class="btn" style="margin-left:8px;">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Courses Enrolled</h2>
+      <p class="muted">(placeholder - show enrolled courses here)</p>
+      <ul id="coursesList" class="list">
+        <li>• Intro to Recording (placeholder)</li>
+        <li>• Mixing Basics (placeholder)</li>
+      </ul>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Statistics</h3>
+        <p class="muted">Account statistics for current user</p>
+        <ul class="list">
+          <li>Sessions booked: <strong id="statSessions">0</strong></li>
+          <li>Hours recorded: <strong id="statHours">0</strong></li>
+          <li>Completed courses: <strong id="statCourses">0</strong></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Games Played History</h3>
+        <p class="muted">Recent activity & game results (placeholder)</p>
+        <ul id="gamesList" class="list">
+          <li>• Rhythm Champ - Score: 850 (placeholder)</li>
+          <li>• Ear Training - Score: 720 (placeholder)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // Read stored user and populate simple placeholders
+      const raw = localStorage.getItem('user');
+      let user = null;
+      try { user = raw ? JSON.parse(raw) : null; } catch(e) { user = null; }
+
+      const displayName = document.getElementById('displayName');
+      const emailEl = document.getElementById('email');
+
+      function getName(u){ if(!u) return null; return u.username || u.name || u.fullname || u.email || 'Account'; }
+      const name = getName(user);
+      if(displayName) displayName.textContent = name || 'Profile';
+      if(emailEl) emailEl.textContent = user && user.email ? user.email : '';
+
+      // simple example stats (placeholder values)
+      document.getElementById('statSessions').textContent = 3;
+      document.getElementById('statHours').textContent = 12;
+      document.getElementById('statCourses').textContent = 2;
+
+      // Logout button behaviour
+      const logoutBtn = document.getElementById('profileLogout');
+      if(logoutBtn){
+        logoutBtn.addEventListener('click', ()=>{
+          if(confirm('Logout from MixLab?')){
+            try{ localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.clear(); }catch(e){}
+            window.location.href = '../login/login.html';
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
