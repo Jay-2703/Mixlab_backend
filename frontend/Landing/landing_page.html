@@ -8,6 +8,10 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="Logo/MixLab_Logo_NoText.PNG">
 
+  <!-- Icon  -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,6 +54,19 @@
       transform: translateY(-1px);
       background: rgba(191,164,91,0.12);
     }
+
+    /* Service & Studio image layouts */
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  /* Old-style: image on top, info below, subtle background */
+  .service-card { display: flex; flex-direction: column; gap: 0; align-items: stretch; background: transparent; padding: 0; border-radius: 10px; }
+  .service-image img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px 10px 0 0; display:block; }
+  .service-info { padding: 12px 10px; background: transparent; color: #222; }
+
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  /* Studio features: image top, info bottom, match previous site color (transparent background) */
+  .feature { display:flex; flex-direction: column; gap:8px; align-items:stretch; padding:0; background: transparent; border-radius:8px; }
+  .feature-image img { width:100%; height:140px; object-fit:cover; border-radius:8px 8px 0 0; }
+  .feature-info { padding:10px; color:#222 }
   </style>
 
 </head>
@@ -224,25 +241,40 @@
       <!-- Services Overview -->
       <div class="services-grid" id="services">
         <div class="service-card">
-          <h3>Recording</h3>
-          <p>
-            Multi-track recording for bands, vocalists, and podcasts — fast turnaround
-            and raw tape emulation available.
-          </p>
+          <div class="service-image">
+            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=800&auto=format&fit=crop" alt="Recording session" />
+          </div>
+          <div class="service-info">
+            <h3>Recording</h3>
+            <p>
+              Multi-track recording for bands, vocalists, and podcasts — fast turnaround
+              and raw tape emulation available.
+            </p>
+          </div>
         </div>
 
         <div class="service-card">
-          <h3>Mixing</h3>
-          <p>
-            Professional mixing with reference checks on multiple systems and stems delivery.
-          </p>
+          <div class="service-image">
+            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop" alt="Mixing console" />
+          </div>
+          <div class="service-info">
+            <h3>Mixing</h3>
+            <p>
+              Professional mixing with reference checks on multiple systems and stems delivery.
+            </p>
+          </div>
         </div>
 
         <div class="service-card">
-          <h3>Mastering</h3>
-          <p>
-            Mastering services to make your tracks ready for streaming and physical release.
-          </p>
+          <div class="service-image">
+            <img src="https://images.unsplash.com/photo-1708791783497-ad3ae07f9e69?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1169" alt="Mastering" />
+          </div>
+          <div class="service-info">
+            <h3>Mastering</h3>
+            <p>
+              Mastering services to make your tracks ready for streaming and physical release.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -251,18 +283,33 @@
 
       <div class="features">
         <div class="feature">
-          <h4>Live Room</h4>
-          <p>Spacious acoustic-treated live room with drum riser.</p>
+          <div class="feature-image">
+            <img src="https://images.unsplash.com/photo-1708791783497-ad3ae07f9e69?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1169" alt="Live Room" />
+          </div>
+          <div class="feature-info">
+            <h4>Live Room</h4>
+            <p>Spacious acoustic-treated live room with drum riser.</p>
+          </div>
         </div>
 
         <div class="feature">
-          <h4>Control Room</h4>
-          <p>Industry monitors, preamps, and 24-track I/O.</p>
+          <div class="feature-image">
+            <img src="https://images.unsplash.com/photo-1708791783497-ad3ae07f9e69?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1169" alt="Control Room" />
+          </div>
+          <div class="feature-info">
+            <h4>Control Room</h4>
+            <p>Industry monitors, preamps, and 24-track I/O.</p>
+          </div>
         </div>
 
         <div class="feature">
-          <h4>Producer-Ready</h4>
-          <p>On-site producer and session players available.</p>
+          <div class="feature-image">
+            <img src="https://images.unsplash.com/photo-1708791783497-ad3ae07f9e69?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1169" alt="Producer Ready" />
+          </div>
+          <div class="feature-info">
+            <h4>Producer-Ready</h4>
+            <p>On-site producer and session players available.</p>
+          </div>
         </div>
       </div>
 
@@ -278,6 +325,17 @@
         </p>
       </div>
 
+    </section>
+
+
+     <section class="card gallery-section">
+      <h1 id="gallery">Gallery</h1>
+      <div class="gallery" aria-live="polite">
+        <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=800&auto=format&fit=crop" alt="Studio 1"/>
+        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop" alt="Studio 2"/>
+        <img src="https://images.unsplash.com/photo-1708791783497-ad3ae07f9e69?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1169" alt="studio"/>
+        <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=800&auto=format&fit=crop" alt="Live Room"/>
+      </div>
     </section>
 
   <main>
@@ -305,15 +363,7 @@
       </div>
     </aside>
 
-    <section class="card gallery-section">
-      <h1 id="gallery">Gallery</h1>
-      <div class="gallery" aria-live="polite">
-        <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=800&auto=format&fit=crop" alt="Studio 1"/>
-        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop" alt="Studio 2"/>
-        <img src="https://images.unsplash.com/photo-1708791783497-ad3ae07f9e69?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1169" alt="studio"/>
-        <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=800&auto=format&fit=crop" alt="Live Room"/>
-      </div>
-    </section>
+   
 <section id="contact" class="contact-section">
   <div class="contact-form-wrapper">
     <form id="contactForm" onsubmit="return false;">
@@ -331,7 +381,8 @@
     <div class="contact-row">
       <div class="contact-box">
         <h4><i class="icon"></i> Studio Address</h4>
-        <p>#123, Sample Street, Your City<br>Your Country – ZIPCODE</p>
+        <p>4th Floor Unit 401 RCJ Building Ortigas Extension Countryside Ave. Pasig City
+           Pasig, Philippines</p>
       </div>
 
       <div class="contact-box">
@@ -350,10 +401,18 @@
   </div>
 </section>
 
-<footer>
-  <div>© <span id="year"></span> Harmonic House</div>
-  <div>IPSUM LOREM </div>
-</footer>
+
+  <footer style="text-align:center;padding:18px 12px;color:var(--muted);">
+
+    <div>© <span id="year"></span> Harmonic House</div>
+    <div>IPSUM LOREM </div>
+    <div style="margin-bottom:8px">Follow us on</div>
+    <div style="display:flex;justify-content:center;gap:18px;align-items:center">
+      <a href="https://www.instagram.com/mixlabmusicstudios.ph" target="_blank" rel="noopener" aria-label="Instagram" style="color:inherit;text-decoration:none">📸 Instagram</a>
+      <a href="https://web.facebook.com/mixlabmusicstudios" target="_blank" rel="noopener" aria-label="Facebook" style="color:inherit;text-decoration:none">📘 Facebook</a>
+      <a href="https:/tiktok.com/@mixlabmusicstudios" target="_blank" rel="noopener" aria-label="TikTok" style="color:inherit;text-decoration:none">🎵 TikTok</a>
+    </div>
+  </footer>
 
   <audio id="sampleAudio" src="https://cdn.simple-mock-audio.example/sample.mp3"></audio>
 
