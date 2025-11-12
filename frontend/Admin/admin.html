@@ -89,80 +89,96 @@
                         </div>
                     </div>
 
-                    <!-- Quick Action Buttons -->
-                    <div class="quick-actions">
-                        <button class="action-btn" id="createAnnouncementBtn">
-                            <i class="fas fa-bullhorn"></i>
-                            <span>Create Announcement</span>
-                        </button>
-                        <button class="action-btn" id="addLessonBtn">
-                            <i class="fas fa-plus"></i>
-                            <span>Add New Lesson</span>
-                        </button>
-                        <button class="action-btn" id="viewBookingsBtn">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>View Pending Bookings</span>
-                        </button>
-                        <button class="action-btn" id="exportReportBtn">
-                            <i class="fas fa-download"></i>
-                            <span>Export Reports</span>
-                        </button>
-                    </div>
-
-                    <!-- Revenue Summary Cards -->
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <h3>Total Revenue</h3>
-                                <i class="fas fa-dollar-sign"></i>
+                    <!-- Dashboard top: quick actions, metrics and a compact calendar beside them -->
+                    <div class="dashboard-top">
+                        <div class="dashboard-left">
+                            <!-- Quick Action Buttons -->
+                            <div class="quick-actions">
+                                <button class="action-btn" id="createAnnouncementBtn">
+                                    <i class="fas fa-bullhorn"></i>
+                                    <span>Create Announcement</span>
+                                </button>
+                                <button class="action-btn" id="addLessonBtn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add New Lesson</span>
+                                </button>
+                                <button class="action-btn" id="viewBookingsBtn">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>View Pending Bookings</span>
+                                </button>
+                                <button class="action-btn" id="exportReportBtn">
+                                    <i class="fas fa-download"></i>
+                                    <span>Export Reports</span>
+                                </button>
                             </div>
-                            <p class="metric-value">$<span id="totalRevenue">24500</span></p>
-                            <p class="metric-change positive">↑ 12% from last period</p>
+
+                            <!-- Revenue Summary Cards (start blank for live data testing) -->
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h3>Total Revenue</h3>
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </div>
+                                    <p class="metric-value">$<span id="totalRevenue"></span></p>
+                                    <p class="metric-change positive"></p>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h3>Enrolled Students</h3>
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <p class="metric-value"><span id="totalStudents"></span></p>
+                                    <p class="metric-change positive"></p>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h3>Total Appointments</h3>
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <p class="metric-value"><span id="totalAppointments"></span></p>
+                                    <p class="metric-change positive"></p>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h3>Active Users</h3>
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <p class="metric-value"><span id="activeUsers"></span></p>
+                                    <p class="metric-change negative"></p>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h3>Pending Appointments</h3>
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <p class="metric-value"><span id="pendingAppointments"></span></p>
+                                    <p class="metric-change warning"></p>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h3>Completion Rate</h3>
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <p class="metric-value"><span id="completionRate"></span>%</p>
+                                    <p class="metric-change positive"></p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <h3>Enrolled Students</h3>
-                                <i class="fas fa-users"></i>
+                        <div class="dashboard-right">
+                            <div class="calendar-container">
+                                <div class="calendar-controls compact">
+                                    <button id="dashboardPrevMonth"><i class="fas fa-chevron-left"></i></button>
+                                    <h4 id="dashboardCurrentMonth"></h4>
+                                    <button id="dashboardNextMonth"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                                <div id="dashboardCalendar" class="calendar"></div>
                             </div>
-                            <p class="metric-value"><span id="totalStudents">342</span></p>
-                            <p class="metric-change positive">↑ 8 new this week</p>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <h3>Total Appointments</h3>
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <p class="metric-value"><span id="totalAppointments">156</span></p>
-                            <p class="metric-change positive">↑ 15% increase</p>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <h3>Active Users</h3>
-                                <i class="fas fa-user-check"></i>
-                            </div>
-                            <p class="metric-value"><span id="activeUsers">298</span></p>
-                            <p class="metric-change negative">↓ 5% decrease</p>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <h3>Pending Appointments</h3>
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <p class="metric-value"><span id="pendingAppointments">23</span></p>
-                            <p class="metric-change warning">⚠ Action needed</p>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-header">
-                                <h3>Completion Rate</h3>
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <p class="metric-value"><span id="completionRate">87</span>%</p>
-                            <p class="metric-change positive">↑ 5% from last month</p>
                         </div>
                     </div>
 
@@ -623,6 +639,39 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Update Appointment</button>
                 <button type="button" class="btn btn-danger" id="deleteAppointmentBtn">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Profile Modal -->
+    <div id="adminProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Admin Profile & Settings</h2>
+            <form id="adminProfileForm">
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" id="adminDisplayName" placeholder="Admin">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="adminEmail" placeholder="admin@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Receive Notifications</label>
+                    <select id="adminNotifications">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Theme</label>
+                    <select id="adminTheme">
+                        <option value="dark">Dark (default)</option>
+                        <option value="light">Light</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
             </form>
         </div>
     </div>

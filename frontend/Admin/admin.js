@@ -6,6 +6,7 @@ class AdminPanel {
     constructor() {
         this.currentSection = 'dashboard';
         this.currentMonth = new Date();
+        this.dashboardMonth = new Date();
         this.selectedAppointmentId = null;
         this.charts = {};
         this.init();
@@ -24,6 +25,7 @@ class AdminPanel {
         this.loadAnnouncements();
         this.loadActivityLogs();
         this.generateCalendar();
+        this.generateDashboardCalendar();
     }
 
     setupEventListeners() {
@@ -44,6 +46,21 @@ class AdminPanel {
             toggleBtn.addEventListener('click', () => {
                 document.querySelector('.sidebar').classList.toggle('active');
             });
+        }
+
+        // Dashboard calendar controls
+        document.getElementById('dashboardPrevMonth')?.addEventListener('click', () => this.prevDashboardMonth());
+        document.getElementById('dashboardNextMonth')?.addEventListener('click', () => this.nextDashboardMonth());
+
+        // Admin profile modal
+        const userProfile = document.querySelector('.user-profile');
+        if (userProfile) {
+            userProfile.addEventListener('click', () => this.openProfile());
+        }
+
+        const adminProfileForm = document.getElementById('adminProfileForm');
+        if (adminProfileForm) {
+            adminProfileForm.addEventListener('submit', (e) => this.handleProfileSubmit(e));
         }
 
         // Date filter
@@ -132,6 +149,36 @@ class AdminPanel {
             this.switchSection('appointments');
             document.querySelector('[data-tab="table"]').click();
         });
+
+        // Convenience buttons
+        document.getElementById('addLessonBtn')?.addEventListener('click', () => {
+            // Open module form directly
+            this.switchSection('content');
+            // ensure modules tab is active
+            this.switchContentTab('modules');
+            this.openModuleForm();
+        });
+
+        document.getElementById('addQuizBtn')?.addEventListener('click', () => {
+            this.switchSection('content');
+            this.switchContentTab('quizzes');
+            // no quiz form implemented yet; focus on quizzes tab
+        });
+
+        document.getElementById('exportReportBtn')?.addEventListener('click', () => {
+            this.switchSection('analytics');
+        });
+
+        document.getElementById('saveTimeSlotsBtn')?.addEventListener('click', () => {
+            // placeholder: implement actual save logic with backend
+            alert('Time slots saved (placeholder)');
+        });
+
+        // Global search - placeholder logging
+        document.getElementById('globalSearch')?.addEventListener('input', (e) => {
+            // Could be wired to filter current active table
+            console.log('Global search:', e.target.value);
+        });
     }
 
     // ========================================
@@ -163,36 +210,57 @@ class AdminPanel {
     getSectionTitle(section) {
         const titles = {
             dashboard: 'Dashboard',
-            users: 'User Management',
             appointments: 'Appointments',
-            content: 'Learning Content',
-            analytics: 'Analytics & Reports',
+            users: 'Users',
+            content: 'Content',
+            analytics: 'Analytics',
             announcements: 'Announcements',
-            logs: 'Activity Logs'
+            settings: 'Settings'
         };
-        return titles[section] || 'Dashboard';
+
+        return titles[section] || '';
+
     }
 
     // ========================================
     // DASHBOARD
     // ========================================
-    loadDashboardData() {
-        // Sample data - replace with API calls
-        const dashboardData = {
-            totalRevenue: 24500,
-            totalStudents: 342,
-            totalAppointments: 156,
-            activeUsers: 298,
-            pendingAppointments: 23,
-            completionRate: 87
-        };
+    async loadDashboardData() {
+        try {
+            const res = await fetch('/api/admin/dashboard');
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const json = await res.json();
 
-        document.getElementById('totalRevenue').textContent = dashboardData.totalRevenue.toLocaleString();
-        document.getElementById('totalStudents').textContent = dashboardData.totalStudents;
-        document.getElementById('totalAppointments').textContent = dashboardData.totalAppointments;
-        document.getElementById('activeUsers').textContent = dashboardData.activeUsers;
-        document.getElementById('pendingAppointments').textContent = dashboardData.pendingAppointments;
-        document.getElementById('completionRate').textContent = dashboardData.completionRate;
+            if (json && json.success && json.data && json.data.overview) {
+                const d = json.data.overview;
+                // Not all metrics may be present; use safe fallbacks
+                document.getElementById('totalRevenue').textContent = (json.data.revenue || 0).toLocaleString();
+                document.getElementById('totalStudents').textContent = d.total_students ?? '0';
+                document.getElementById('totalAppointments').textContent = d.total_appointments ?? '0';
+                document.getElementById('activeUsers').textContent = d.total_students ?? '0';
+                document.getElementById('pendingAppointments').textContent = (json.data.recent_bookings || []).filter(b => b.status === 'pending').length;
+                document.getElementById('completionRate').textContent = json.data.performance?.avg_completion_rate ?? '0';
+                return;
+            }
+
+            // If payload is unexpected, leave dashboard blank so you can verify live backend data
+            console.warn('Unexpected dashboard payload — leaving dashboard values blank for testing');
+            document.getElementById('totalRevenue').textContent = '';
+            document.getElementById('totalStudents').textContent = '';
+            document.getElementById('totalAppointments').textContent = '';
+            document.getElementById('activeUsers').textContent = '';
+            document.getElementById('pendingAppointments').textContent = '';
+            document.getElementById('completionRate').textContent = '';
+        } catch (err) {
+            console.error('Failed to load dashboard data:', err);
+            // keep fields blank on error so admin shows only live data
+            document.getElementById('totalRevenue').textContent = '';
+            document.getElementById('totalStudents').textContent = '';
+            document.getElementById('totalAppointments').textContent = '';
+            document.getElementById('activeUsers').textContent = '';
+            document.getElementById('pendingAppointments').textContent = '';
+            document.getElementById('completionRate').textContent = '';
+        }
     }
 
     initializeCharts() {
@@ -209,17 +277,17 @@ class AdminPanel {
         this.charts.revenue = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: [],
                 datasets: [{
                     label: 'Revenue',
-                    data: [5000, 7200, 6800, 9100, 10500, 12300],
-                    borderColor: '#5b5bff',
-                    backgroundColor: 'rgba(91, 91, 255, 0.1)',
+                    data: [],
+                    borderColor: 'rgba(255,215,0,0.9)',
+                    backgroundColor: 'rgba(255,215,0,0.07)',
                     tension: 0.4,
                     fill: true,
                     pointRadius: 5,
-                    pointBackgroundColor: '#5b5bff',
-                    pointBorderColor: '#fff',
+                    pointBackgroundColor: 'rgba(255,215,0,0.9)',
+                    pointBorderColor: '#111',
                     pointBorderWidth: 2
                 }]
             },
@@ -253,11 +321,15 @@ class AdminPanel {
         this.charts.service = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Piano Lessons', 'Guitar Lessons', 'Drum Lessons'],
+                labels: [],
                 datasets: [{
-                    data: [45, 35, 20],
-                    backgroundColor: ['#5b5bff', '#10b981', '#f59e0b'],
-                    borderColor: '#fff',
+                    data: [],
+                    backgroundColor: [
+                        'rgba(255,215,0,0.9)',
+                        'rgba(255,215,0,0.6)',
+                        'rgba(255,215,0,0.3)'
+                    ],
+                    borderColor: 'rgba(255,255,255,0.05)',
                     borderWidth: 2
                 }]
             },
@@ -280,11 +352,11 @@ class AdminPanel {
         this.charts.engagement = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                labels: [],
                 datasets: [{
                     label: 'Active Users',
-                    data: [120, 150, 130, 180, 160, 140, 100],
-                    backgroundColor: '#5b5bff',
+                    data: [],
+                    backgroundColor: 'rgba(255,215,0,0.9)',
                     borderRadius: 8,
                     borderSkipped: false
                 }]
@@ -310,13 +382,13 @@ class AdminPanel {
         this.charts.performance = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Completion', 'Engagement', 'Performance', 'Attendance', 'Feedback'],
+                labels: [],
                 datasets: [{
                     label: 'Metrics',
-                    data: [85, 75, 80, 90, 78],
-                    borderColor: '#5b5bff',
-                    backgroundColor: 'rgba(91, 91, 255, 0.1)',
-                    pointBackgroundColor: '#5b5bff'
+                    data: [],
+                    borderColor: 'rgba(255,215,0,0.9)',
+                    backgroundColor: 'rgba(255,215,0,0.07)',
+                    pointBackgroundColor: 'rgba(255,215,0,0.9)'
                 }]
             },
             options: {
@@ -345,18 +417,35 @@ class AdminPanel {
     // ========================================
     // USER MANAGEMENT
     // ========================================
-    loadUsers() {
-        const users = [
-            { id: 1, username: 'john_musician', email: 'john@example.com', role: 'student', date: '2024-01-15', status: 'active' },
-            { id: 2, username: 'sarah_piano', email: 'sarah@example.com', role: 'instructor', date: '2024-01-20', status: 'active' },
-            { id: 3, username: 'mike_guitar', email: 'mike@example.com', role: 'student', date: '2024-02-01', status: 'inactive' },
-            { id: 4, username: 'emma_admin', email: 'emma@example.com', role: 'admin', date: '2023-12-10', status: 'active' },
-            { id: 5, username: 'alex_drums', email: 'alex@example.com', role: 'instructor', date: '2024-01-25', status: 'active' }
-        ];
+    async loadUsers() {
+        try {
+            const res = await fetch('/api/admin/users?limit=200');
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const json = await res.json();
 
-        this.renderUsersTable(users);
-        this.setupUserFilters(users);
+            const users = (json && json.success && Array.isArray(json.data)) ? json.data : [];
+
+            // map to expected shape for rendering (add placeholder status)
+            const mapped = users.map(u => ({
+                id: u.id,
+                username: u.username,
+                email: u.email,
+                role: u.role,
+                date: u.created_at?.split('T')?.[0] ?? u.created_at ?? '',
+                status: u.is_active || u.status || 'active'
+            }));
+
+            this.renderUsersTable(mapped);
+            this.setupUserFilters(mapped);
+        } catch (err) {
+            console.error('Failed to load users from API:', err);
+            // If the API is unreachable show an empty users table so you can verify DB connectivity from the backend.
+            const users = [];
+            this.renderUsersTable(users);
+            this.setupUserFilters(users);
+        }
     }
+    
 
     renderUsersTable(users) {
         const tbody = document.getElementById('usersTableBody');
@@ -480,14 +569,29 @@ class AdminPanel {
     // ========================================
     // APPOINTMENTS
     // ========================================
-    loadAppointments() {
-        const appointments = [
-            { id: 1, date: '2024-01-25', time: '10:00 AM', student: 'John Music', instructor: 'Sarah Piano', service: 'Piano', status: 'confirmed' },
-            { id: 2, date: '2024-01-26', time: '2:00 PM', student: 'Mike Guitar', instructor: 'Alex Drums', service: 'Guitar', status: 'pending' },
-            { id: 3, date: '2024-01-27', time: '11:00 AM', student: 'Emma Music', instructor: 'Sarah Piano', service: 'Piano', status: 'completed' },
-        ];
+    async loadAppointments() {
+        try {
+            const res = await fetch('/api/admin/appointments?limit=200');
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const json = await res.json();
 
-        this.renderAppointmentsTable(appointments);
+            const appointments = (json && json.success && Array.isArray(json.data)) ? json.data.map(a => ({
+                id: a.booking_id || a.id,
+                date: a.booking_date?.split('T')?.[0] ?? a.booking_date ?? '',
+                time: (a.start_time && a.end_time) ? `${a.start_time} - ${a.end_time}` : (a.time || ''),
+                student: a.student_name ?? a.student ?? '',
+                instructor: a.instructor_name ?? a.instructor ?? '',
+                service: a.lesson_type ?? a.service ?? '',
+                status: a.status ?? 'pending'
+            })) : [];
+
+            this.renderAppointmentsTable(appointments);
+        } catch (err) {
+            console.error('Failed to load appointments from API:', err);
+            // No sample fallback — keep table empty so you can verify live backend connectivity.
+            const appointments = [];
+            this.renderAppointmentsTable(appointments);
+        }
     }
 
     renderAppointmentsTable(appointments) {
@@ -566,6 +670,58 @@ class AdminPanel {
         document.getElementById('calendar').innerHTML = html;
     }
 
+    // Dashboard calendar (compact) - uses its own month state
+    generateDashboardCalendar() {
+        const year = this.dashboardMonth.getFullYear();
+        const month = this.dashboardMonth.getMonth();
+
+        const current = document.getElementById('dashboardCurrentMonth');
+        if (current) {
+            current.textContent = this.dashboardMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        }
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+
+        let html = '';
+
+        // Days of week headers
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        daysOfWeek.forEach(day => {
+            html += `<div class="calendar-day header">${day}</div>`;
+        });
+
+        // Empty cells for days before month starts
+        for (let i = 0; i < startingDayOfWeek; i++) {
+            html += `<div class="calendar-day other-month"></div>`;
+        }
+
+        // Days of the month (compact marking only)
+        for (let day = 1; day <= daysInMonth; day++) {
+            const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+            html += `
+                <div class="calendar-day ${isToday ? 'today' : ''}">
+                    ${day}
+                </div>
+            `;
+        }
+
+        const el = document.getElementById('dashboardCalendar');
+        if (el) el.innerHTML = html;
+    }
+
+    prevDashboardMonth() {
+        this.dashboardMonth.setMonth(this.dashboardMonth.getMonth() - 1);
+        this.generateDashboardCalendar();
+    }
+
+    nextDashboardMonth() {
+        this.dashboardMonth.setMonth(this.dashboardMonth.getMonth() + 1);
+        this.generateDashboardCalendar();
+    }
+
     prevMonth() {
         this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
         this.generateCalendar();
@@ -577,43 +733,57 @@ class AdminPanel {
     }
 
     switchAppointmentTab(tab) {
+        // Activate the tab button that matches the provided tab key
         document.querySelectorAll('.appointment-tabs .tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelectorAll('.appointment-tabs').forEach(t => {
-            document.querySelector(`[data-tab="${t.dataset.tab}"]`)?.classList.remove('active');
+            btn.classList.toggle('active', btn.dataset.tab === tab);
         });
 
-        event.target.classList.add('active');
-        document.getElementById(`${tab}-tab`).classList.add('active');
+        // Hide all appointment tab contents, then show the selected one
+        document.querySelectorAll('#appointments .tab-content').forEach(content => content.classList.remove('active'));
+        const target = document.getElementById(`${tab}-tab`);
+        if (target) target.classList.add('active');
     }
 
     // ========================================
     // CONTENT MANAGEMENT
     // ========================================
-    loadModules() {
-        const modules = [
-            { id: 1, name: 'Beginner Piano', level: 1, service: 'Piano', status: 'active', enrolled: 45 },
-            { id: 2, name: 'Intermediate Guitar', level: 5, service: 'Guitar', status: 'active', enrolled: 32 },
-            { id: 3, name: 'Advanced Music Theory', level: 10, service: 'Piano', status: 'inactive', enrolled: 12 }
-        ];
+    async loadModules() {
+        try {
+            const res = await fetch('/api/admin/lessons?limit=200');
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const json = await res.json();
 
-        const tbody = document.getElementById('modulesTableBody');
-        if (!tbody) return;
+            const modules = (json && json.success && Array.isArray(json.data)) ? json.data.map(m => ({
+                id: m.lesson_id || m.id,
+                name: m.title || m.name,
+                level: m.level || m.order_index || 1,
+                service: m.instrument || m.service || '',
+                status: m.is_active ? 'active' : (m.status || 'active'),
+                enrolled: m.enrolled || 0
+            })) : [];
 
-        tbody.innerHTML = modules.map(m => `
-            <tr>
-                <td>${m.name}</td>
-                <td>Level ${m.level}</td>
-                <td>${m.service}</td>
-                <td><span class="status-badge status-${m.status}">${m.status}</span></td>
-                <td>${m.enrolled}</td>
-                <td>
-                    <button class="btn btn-secondary" onclick="admin.editModule(${m.id})">Edit</button>
-                    <button class="btn btn-danger" onclick="admin.deleteModule(${m.id})">Delete</button>
-                </td>
-            </tr>
-        `).join('');
+            const tbody = document.getElementById('modulesTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = modules.map(m => `
+                <tr>
+                    <td>${m.name}</td>
+                    <td>Level ${m.level}</td>
+                    <td>${m.service}</td>
+                    <td><span class="status-badge status-${m.status}">${m.status}</span></td>
+                    <td>${m.enrolled}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="admin.editModule(${m.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="admin.deleteModule(${m.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error('Failed to load modules from API:', err);
+            const tbody = document.getElementById('modulesTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = ''; // empty when API fails
+        }
     }
 
     openModuleForm(moduleId = null) {
@@ -648,8 +818,15 @@ class AdminPanel {
             content.classList.remove('active');
         });
 
-        event.target.classList.add('active');
-        document.getElementById(`${tab}-tab`).classList.add('active');
+            // Toggle active state on content tab buttons
+            document.querySelectorAll('.content-tabs .tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+
+            // Hide all content tab contents within the content section
+            document.querySelectorAll('#content .tab-content').forEach(content => content.classList.remove('active'));
+            const target = document.getElementById(`${tab}-tab`);
+            if (target) target.classList.add('active');
     }
 
     // ========================================
@@ -721,14 +898,15 @@ class AdminPanel {
     // ANNOUNCEMENTS
     // ========================================
     loadAnnouncements() {
-        const announcements = [
-            { id: 1, title: 'New Guitar Course', content: 'We have launched a new beginner guitar course', date: '2024-01-25', audience: 'all' },
-            { id: 2, title: 'System Maintenance', content: 'Scheduled maintenance on Feb 1st', date: '2024-01-20', audience: 'all' },
-            { id: 3, title: 'Scholarship Program', content: 'Apply now for our scholarship program', date: '2024-01-18', audience: 'students' }
-        ];
-
+        // Announcements will be provided by the backend API. Leave empty so admin shows live data only.
+        const announcements = [];
         const list = document.getElementById('announcementsList');
         if (!list) return;
+
+        if (announcements.length === 0) {
+            list.innerHTML = '<div class="announcement-empty">No announcements available.</div>';
+            return;
+        }
 
         list.innerHTML = announcements.map(ann => `
             <div class="announcement-card">
@@ -779,25 +957,11 @@ class AdminPanel {
     // ACTIVITY LOGS
     // ========================================
     loadActivityLogs() {
-        const logs = [
-            { id: 1, timestamp: '2024-01-25 14:30:00', user: 'john_musician', type: 'login', details: 'User logged in', status: 'success' },
-            { id: 2, timestamp: '2024-01-25 14:35:00', user: 'john_musician', type: 'appointment', details: 'Booked piano lesson', status: 'success' },
-            { id: 3, timestamp: '2024-01-25 14:40:00', user: 'sarah_piano', type: 'user_activity', details: 'Updated profile', status: 'success' },
-            { id: 4, timestamp: '2024-01-25 14:45:00', user: 'system', type: 'system_event', details: 'Database backup completed', status: 'success' }
-        ];
-
+        // Activity logs should come from the backend. Show empty state so the UI reflects live data.
+        const logs = [];
         const tbody = document.getElementById('logsTableBody');
         if (!tbody) return;
-
-        tbody.innerHTML = logs.map(log => `
-            <tr>
-                <td>${log.timestamp}</td>
-                <td>${log.user}</td>
-                <td>${log.type}</td>
-                <td>${log.details}</td>
-                <td><span class="status-badge status-${log.status}">${log.status}</span></td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = '';
     }
 
     // ========================================
@@ -806,6 +970,32 @@ class AdminPanel {
     showNotification(message, type = 'info') {
         console.log(`[${type}] ${message}`);
         // Implement notification system
+    }
+
+    // ========================================
+    // ADMIN PROFILE
+    // ========================================
+    openProfile() {
+        const modal = document.getElementById('adminProfileModal');
+        if (!modal) return;
+        // Prefill with defaults (could fetch from API)
+        document.getElementById('adminDisplayName').value = 'Admin';
+        document.getElementById('adminEmail').value = 'admin@example.com';
+        document.getElementById('adminNotifications').value = 'yes';
+        document.getElementById('adminTheme').value = 'dark';
+        modal.classList.add('active');
+    }
+
+    handleProfileSubmit(e) {
+        e.preventDefault();
+        const name = document.getElementById('adminDisplayName').value;
+        const email = document.getElementById('adminEmail').value;
+        const notifications = document.getElementById('adminNotifications').value;
+        const theme = document.getElementById('adminTheme').value;
+
+        console.log('Profile saved:', { name, email, notifications, theme });
+        alert('Profile settings saved (local only).');
+        document.getElementById('adminProfileModal').classList.remove('active');
     }
 }
 
